@@ -1,0 +1,39 @@
+name: Repository Dispatch Workflow
+on:
+  repository_dispatch:
+    types: [upload-workflow]  # This matches the event_type in your HTTP request
+
+jobs:
+  process-dispatch:
+    runs-on: ubuntu-22.04
+    
+    # Add permissions if needed for GitHub token
+    permissions:
+      contents: read
+      
+    steps:
+      # Step 1: Check out the repository code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      # Step 2: Access the dispatch event payload
+      - name: Process dispatch payload
+        run: |
+          echo "Received dispatch from: ${{ github.event.client_payload.name }}"
+          echo "Repository name: ${{ github.event.client_payload.repo_name }}"
+      
+      # Step 3: Example of using the payload data
+      - name: Perform action based on dispatch
+        env:
+          SENDER_NAME: ${{ github.event.client_payload.name }}
+          REPO_NAME: ${{ github.event.client_payload.repo_name }}
+        run: |
+          # Add your custom workflow actions here
+          echo "Processing request from $SENDER_NAME for repository $REPO_NAME"
+          
+      # Step 4: Example of error handling
+      - name: Error handling
+        if: failure()
+        run: |
+          echo "Workflow failed - sending notification"
+          # Add your error handling logic here
